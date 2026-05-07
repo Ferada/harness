@@ -44,7 +44,7 @@ func (s *Service) CheckRules(
 ) (protection.MergeVerifyOutput, []types.RuleViolations, error) {
 	reviewers, err := s.reviewerStore.List(ctx, in.PullReq.ID)
 	if err != nil {
-		return protection.MergeVerifyOutput{}, nil, fmt.Errorf("failed to load list of reviwers: %w", err)
+		return protection.MergeVerifyOutput{}, nil, fmt.Errorf("failed to load list of reviewers: %w", err)
 	}
 
 	checkResults, err := s.checkStore.ListResults(ctx, in.PullReq.TargetRepoID, in.PullReq.SourceSHA)
