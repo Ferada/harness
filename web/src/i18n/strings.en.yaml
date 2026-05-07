@@ -1094,6 +1094,8 @@ protectionRules:
   limitMergeStrategiesText: Limit which merge strategies are available to merge a pull request
   autoDeleteTitle: Auto delete branch on merge
   autoDeleteText: Automatically delete the source branch of a pull request after it is merged
+  requireUpToDateTitle: Require branch to be up-to-date
+  requireUpToDateText: The source branch must be up-to-date with the target branch before merging
   blockCreation: Block {{ruleType}} creation
   blockUpdate: Block {{ruleType}} update
   blockUpdateText: Only allow users with bypass permission to update matching {{refs}}

@@ -333,6 +333,16 @@ const BranchRulesForm = ({
       <Text padding={{ left: 'xlarge' }} className={css.checkboxText}>
         {getString('protectionRules.autoDeleteText')}
       </Text>
+
+      <hr className={css.dividerContainer} />
+      <FormInput.CheckBox
+        className={css.checkboxLabel}
+        label={getString('protectionRules.requireUpToDateTitle')}
+        name={'requireUpToDate'}
+      />
+      <Text padding={{ left: 'xlarge' }} className={css.checkboxText}>
+        {getString('protectionRules.requireUpToDateText')}
+      </Text>
     </>
   )
 }

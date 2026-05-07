@@ -72,6 +72,7 @@ export type RulesFormPayload = {
   rebaseMerge?: boolean
   fastForwardMerge?: boolean
   autoDelete?: boolean
+  requireUpToDate?: boolean
   blockCreation?: boolean
   blockDeletion?: boolean
   blockUpdate?: boolean
@@ -93,6 +94,7 @@ export enum RuleFields {
   STATUS_CHECKS_REQUIRE_IDENTIFIERS = 'pullreq.status_checks.require_identifiers',
   MERGE_STRATEGIES_ALLOWED = 'pullreq.merge.strategies_allowed',
   MERGE_DELETE_BRANCH = 'pullreq.merge.delete_branch',
+  MERGE_REQUIRE_UP_TO_DATE = 'pullreq.merge.require_up_to_date',
   LIFECYCLE_CREATE_FORBIDDEN = 'lifecycle.create_forbidden',
   LIFECYCLE_DELETE_FORBIDDEN = 'lifecycle.delete_forbidden',
   MERGE_BLOCK = 'pullreq.merge.block',
@@ -116,6 +118,7 @@ export function createRuleFieldsMap(ruleDefinition: Rule): RuleFieldsMap {
     [RuleFields.STATUS_CHECKS_REQUIRE_IDENTIFIERS]: false,
     [RuleFields.MERGE_STRATEGIES_ALLOWED]: false,
     [RuleFields.MERGE_DELETE_BRANCH]: false,
+    [RuleFields.MERGE_REQUIRE_UP_TO_DATE]: false,
     [RuleFields.LIFECYCLE_CREATE_FORBIDDEN]: false,
     [RuleFields.LIFECYCLE_DELETE_FORBIDDEN]: false,
     [RuleFields.MERGE_BLOCK]: false,
@@ -142,6 +145,7 @@ export function createRuleFieldsMap(ruleDefinition: Rule): RuleFieldsMap {
     if (ruleDefinition.pullreq.merge) {
       ruleFieldsMap[RuleFields.MERGE_BLOCK] = !!ruleDefinition.pullreq.merge.block
       ruleFieldsMap[RuleFields.MERGE_DELETE_BRANCH] = !!ruleDefinition.pullreq.merge.delete_branch
+      ruleFieldsMap[RuleFields.MERGE_REQUIRE_UP_TO_DATE] = !!ruleDefinition.pullreq.merge.require_up_to_date
       ruleFieldsMap[RuleFields.MERGE_STRATEGIES_ALLOWED] =
         Array.isArray(ruleDefinition.pullreq.merge.strategies_allowed) &&
         ruleDefinition.pullreq.merge.strategies_allowed.length > 0
@@ -258,6 +262,12 @@ export const getProtectionRules = (getString: UseStringsReturn['getString'], rul
             [RuleFields.MERGE_DELETE_BRANCH]: true
           }
         },
+        requireUpToDateTitle: {
+          title: getString('protectionRules.requireUpToDateTitle'),
+          requiredRule: {
+            [RuleFields.MERGE_REQUIRE_UP_TO_DATE]: true
+          }
+        },
         requirePr: {
           title: getString('protectionRules.requirePr'),
           requiredRule: {
@@ -323,6 +333,7 @@ export const rulesFormInitialPayload: RulesFormPayload = {
   squashMerge: false,
   rebaseMerge: false,
   autoDelete: false,
+  requireUpToDate: false,
   blockCreation: false,
   blockDeletion: false,
   blockUpdate: false,
@@ -425,6 +436,7 @@ export const getPayload = (formData: RulesFormPayload, ruleType: OpenapiRuleType
               merge: {
                 strategies_allowed: stratArray,
                 delete_branch: formData.autoDelete,
+                require_up_to_date: formData.requireUpToDate,
                 block: formData.blockUpdate
               },
               status_checks: {
