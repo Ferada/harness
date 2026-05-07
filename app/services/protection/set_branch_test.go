@@ -331,6 +331,158 @@ func TestRuleSet_MergeVerify(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "require-up-to-date-branch-is-up-to-date",
+			rules: []types.RuleInfoInternal{
+				{
+					RuleInfo: types.RuleInfo{
+						SpacePath:  "",
+						RepoPath:   "space/repo",
+						ID:         1,
+						Identifier: "rule1",
+						Type:       TypeBranch,
+						State:      enum.RuleStateActive,
+					},
+					Pattern:    []byte(`{"default":true}`),
+					Definition: []byte(`{"pullreq":{"merge":{"require_up_to_date":true}}}`),
+					RepoTarget: emptyRepoTarget,
+				},
+			},
+			input: MergeVerifyInput{
+				Actor:            &types.Principal{ID: 1},
+				TargetRepo:       &types.RepositoryCore{ID: 1, DefaultBranch: "main"},
+				PullReq:          &types.PullReq{ID: 1, SourceBranch: "pr", TargetBranch: "main", MergeBaseSHA: "abc123"},
+				CurrentTargetSHA: "abc123",
+				Method:           enum.MergeMethodMerge,
+			},
+			expOut: MergeVerifyOutput{
+				DeleteSourceBranch: false,
+				AllowedMethods:     enum.MergeMethods,
+			},
+			expViol: nil,
+		},
+		{
+			name: "require-up-to-date-branch-is-behind",
+			rules: []types.RuleInfoInternal{
+				{
+					RuleInfo: types.RuleInfo{
+						SpacePath:  "",
+						RepoPath:   "space/repo",
+						ID:         1,
+						Identifier: "rule1",
+						Type:       TypeBranch,
+						State:      enum.RuleStateActive,
+					},
+					Pattern:    []byte(`{"default":true}`),
+					Definition: []byte(`{"pullreq":{"merge":{"require_up_to_date":true}}}`),
+					RepoTarget: emptyRepoTarget,
+				},
+			},
+			input: MergeVerifyInput{
+				Actor:            &types.Principal{ID: 1},
+				TargetRepo:       &types.RepositoryCore{ID: 1, DefaultBranch: "main"},
+				PullReq:          &types.PullReq{ID: 1, SourceBranch: "pr", TargetBranch: "main", MergeBaseSHA: "abc123"},
+				CurrentTargetSHA: "def456",
+				Method:           enum.MergeMethodMerge,
+			},
+			expOut: MergeVerifyOutput{
+				DeleteSourceBranch: false,
+				AllowedMethods:     enum.MergeMethods,
+			},
+			expViol: []types.RuleViolations{
+				{
+					Rule: types.RuleInfo{
+						SpacePath:  "",
+						RepoPath:   "space/repo",
+						ID:         1,
+						Identifier: "rule1",
+						Type:       TypeBranch,
+						State:      enum.RuleStateActive,
+					},
+					Bypassed: false,
+					Violations: []types.Violation{
+						{Code: codePullReqMergeRequireUpToDate},
+					},
+				},
+			},
+		},
+		{
+			name: "require-up-to-date-not-set",
+			rules: []types.RuleInfoInternal{
+				{
+					RuleInfo: types.RuleInfo{
+						SpacePath:  "",
+						RepoPath:   "space/repo",
+						ID:         1,
+						Identifier: "rule1",
+						Type:       TypeBranch,
+						State:      enum.RuleStateActive,
+					},
+					Pattern:    []byte(`{"default":true}`),
+					Definition: []byte(`{"pullreq":{"merge":{"require_up_to_date":false}}}`),
+					RepoTarget: emptyRepoTarget,
+				},
+			},
+			input: MergeVerifyInput{
+				Actor:            &types.Principal{ID: 1},
+				TargetRepo:       &types.RepositoryCore{ID: 1, DefaultBranch: "main"},
+				PullReq:          &types.PullReq{ID: 1, SourceBranch: "pr", TargetBranch: "main", MergeBaseSHA: "abc123"},
+				CurrentTargetSHA: "def456",
+				Method:           enum.MergeMethodMerge,
+			},
+			expOut: MergeVerifyOutput{
+				DeleteSourceBranch: false,
+				AllowedMethods:     enum.MergeMethods,
+			},
+			expViol: nil,
+		},
+		{
+			name: "require-up-to-date-with-bypass",
+			rules: []types.RuleInfoInternal{
+				{
+					RuleInfo: types.RuleInfo{
+						SpacePath:  "",
+						RepoPath:   "space/repo",
+						ID:         1,
+						Identifier: "rule1",
+						Type:       TypeBranch,
+						State:      enum.RuleStateActive,
+					},
+					Pattern:    []byte(`{"default":true}`),
+					Definition: []byte(`{"bypass":{"repo_owners":true},"pullreq":{"merge":{"require_up_to_date":true}}}`),
+					RepoTarget: emptyRepoTarget,
+				},
+			},
+			input: MergeVerifyInput{
+				Actor:            &types.Principal{ID: 1},
+				IsRepoOwner:      true,
+				AllowBypass:      true,
+				TargetRepo:       &types.RepositoryCore{ID: 1, DefaultBranch: "main"},
+				PullReq:          &types.PullReq{ID: 1, SourceBranch: "pr", TargetBranch: "main", MergeBaseSHA: "abc123"},
+				CurrentTargetSHA: "def456",
+				Method:           enum.MergeMethodMerge,
+			},
+			expOut: MergeVerifyOutput{
+				DeleteSourceBranch: false,
+				AllowedMethods:     enum.MergeMethods,
+			},
+			expViol: []types.RuleViolations{
+				{
+					Rule: types.RuleInfo{
+						SpacePath:  "",
+						RepoPath:   "space/repo",
+						ID:         1,
+						Identifier: "rule1",
+						Type:       TypeBranch,
+						State:      enum.RuleStateActive,
+					},
+					Bypassed: true,
+					Violations: []types.Violation{
+						{Code: codePullReqMergeRequireUpToDate},
+					},
+				},
+			},
+		},
 	}
 
 	ctx := context.Background()

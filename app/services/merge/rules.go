@@ -21,6 +21,8 @@ import (
 	"github.com/harness/gitness/app/services/codeowners"
 	"github.com/harness/gitness/app/services/protection"
 	"github.com/harness/gitness/errors"
+	"github.com/harness/gitness/git"
+	gitenum "github.com/harness/gitness/git/enum"
 	"github.com/harness/gitness/types"
 	"github.com/harness/gitness/types/enum"
 )
@@ -55,6 +57,16 @@ func (s *Service) CheckRules(
 		return protection.MergeVerifyOutput{}, nil, fmt.Errorf("CODEOWNERS evaluation failed: %w", err)
 	}
 
+	// Fetch current target branch HEAD SHA
+	targetRef, err := s.git.GetRef(ctx, git.GetRefParams{
+		ReadParams: git.ReadParams{RepoUID: in.TargetRepo.GitUID},
+		Name:       in.PullReq.TargetBranch,
+		Type:       gitenum.RefTypeBranch,
+	})
+	if err != nil {
+		return protection.MergeVerifyOutput{}, nil, fmt.Errorf("failed to get target branch ref: %w", err)
+	}
+
 	ruleOut, violations, err := protectionRules.MergeVerify(ctx, protection.MergeVerifyInput{
 		ResolveUserGroupIDs: s.userGroupService.ListUserIDsByGroupIDs,
 		MapUserGroupIDs:     s.userGroupService.MapGroupIDsToPrincipals,
@@ -68,6 +80,7 @@ func (s *Service) CheckRules(
 		Method:              in.MergeMethod,
 		CheckResults:        checkResults,
 		CodeOwners:          codeOwnerWithApproval,
+		CurrentTargetSHA:    targetRef.SHA.String(),
 	})
 	if err != nil {
 		return protection.MergeVerifyOutput{}, nil, fmt.Errorf("failed to verify protection rules: %w", err)

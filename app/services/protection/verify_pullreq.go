@@ -48,6 +48,7 @@ type (
 		Method              enum.MergeMethod // the method can be empty for dry run or dry run rules
 		CheckResults        []types.CheckResult
 		CodeOwners          *codeowners.Evaluation
+		CurrentTargetSHA    string // current HEAD SHA of target branch
 	}
 
 	MergeVerifyOutput struct {
@@ -149,6 +150,7 @@ const (
 	codePullReqMergeStrategiesAllowed = "pullreq.merge.strategies_allowed"
 	codePullReqMergeDeleteBranch      = "pullreq.merge.delete_branch"
 	codePullReqMergeBlock             = "pullreq.merge.blocked"
+	codePullReqMergeRequireUpToDate   = "pullreq.merge.require_up_to_date"
 
 	codeMergeQueueBranchUpdateVerify = "pullreq.merge_queue.branch_change_block"
 
@@ -386,6 +388,18 @@ func (v *DefPullReq) MergeVerify(
 			"The merge for the branch %s is not allowed.", in.PullReq.TargetBranch)
 	}
 
+	if v.Merge.RequireUpToDate {
+		// Check if the merge base equals the current target branch HEAD
+		// If PR's MergeBaseSHA != CurrentTargetSHA, the source branch is behind
+		if in.PullReq.MergeBaseSHA != in.CurrentTargetSHA {
+			violations.Addf(
+				codePullReqMergeRequireUpToDate,
+				"Source branch must be up-to-date with target branch %s. "+
+					"The target branch has new commits since this PR was last updated.",
+				in.PullReq.TargetBranch)
+		}
+	}
+
 	if len(violations.Violations) > 0 {
 		return out, []types.RuleViolations{violations}, nil
 	}
@@ -501,6 +515,7 @@ type DefMerge struct {
 	DeleteBranch         bool               `json:"delete_branch,omitempty"`
 	Block                bool               `json:"block,omitempty"`
 	RequireBypassMessage bool               `json:"require_bypass_message,omitempty"`
+	RequireUpToDate      bool               `json:"require_up_to_date,omitempty"`
 }
 
 func (v *DefMerge) Sanitize() error {
