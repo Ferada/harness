@@ -1,0 +1,61 @@
+app/services/merge/rules.go
+  human 47
+  7e35add0-da29-4c2a-a2d2-1ed2828cb3ce 24-25,60-69,83
+---
+{
+  "attestations": [
+    {
+      "entries": [
+        {
+          "accepted_lines": 1,
+          "added_lines": 1,
+          "deleted_lines": 0,
+          "hash": "human",
+          "lines": "47",
+          "overridden_lines": 0
+        },
+        {
+          "accepted_lines": 13,
+          "added_lines": 0,
+          "deleted_lines": 0,
+          "hash": "7e35add0-da29-4c2a-a2d2-1ed2828cb3ce",
+          "lines": "24-25,60-69,83",
+          "overridden_lines": 0
+        }
+      ],
+      "file": "app/services/merge/rules.go"
+    }
+  ],
+  "base_commit_sha": "729c1d791afff1037bf9262edba7e16d5eabcd7c",
+  "branch": "olof/features/require-up-to-date-branches",
+  "commit_sha": "b5003fdd71a235890c5c4d5d942d12ffae506b4a",
+  "commit_time": "2026-05-07T12:10:08+02:00",
+  "commit_type": "direct_commit",
+  "git_ai_version": "1.4.2",
+  "prompts": {
+    "7e35add0-da29-4c2a-a2d2-1ed2828cb3ce": {
+      "accepted_lines": 179,
+      "agent_id": {
+        "id": "7e35add0-da29-4c2a-a2d2-1ed2828cb3ce",
+        "model": "claude-sonnet-4-5-20250929",
+        "tool": "claude"
+      },
+      "human_author": "Olof-Joachim Frahm (欧雅福) <olof-joachim.frahm@harness.io>",
+      "messages": [],
+      "overriden_lines": 0,
+      "total_additions": 180,
+      "total_deletions": 0
+    },
+    "human": {
+      "accepted_lines": 1,
+      "agent_id": null,
+      "human_author": "Olof-Joachim Frahm (欧雅福) <olof-joachim.frahm@harness.io>",
+      "messages": [],
+      "overriden_lines": 0,
+      "total_additions": 1,
+      "total_deletions": 0
+    }
+  },
+  "repo": "git@github.com:harness/harness.git",
+  "schema_version": "authorship/3.0.0"
+}
